@@ -98,7 +98,10 @@ questions.forEach((item, i) => {
 
 function submitQuiz(){
   const name = document.getElementById("fullname").value.trim();
-  if(!name){ alert("Enter full name."); return; }
+  if(!name){
+    alert("Enter full name.");
+    return;
+  }
 
   let score = 0;
   let resultText = `Name: ${name}\n\n`;
@@ -111,14 +114,22 @@ function submitQuiz(){
 
   resultText += `\nFinal Score: ${score}/60`;
 
-  alert(`Score: ${score}/60`);
-
-  emailjs.send("service_6wxvrd5","template_h17e9fg",{
-    to_email: "keithrivera@keibatech.com",
-    filename: `${name} - ${score}.txt`,
-    message: resultText
+  emailjs.send(
+    "service_6wvxrd5",   // ✅ CORRECT SERVICE ID
+    "template_h17e9fg",  // ✅ TEMPLATE ID
+    {
+      to_email: "keithrivera@keibatech.com",
+      filename: `${name} - ${score}.txt`,
+      message: resultText
+    }
+  )
+  .then(() => {
+    alert(`✅ Submitted successfully!\nScore: ${score}/60`);
+  })
+  .catch(error => {
+    console.error("EmailJS Error:", error);
+    alert("❌ Email failed. Press F12 → Console.");
   });
-
 }
 </script>
 </body>
