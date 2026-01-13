@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Excel Skills Quiz</title>
 
-<!-- EmailJS v3 -->
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
@@ -26,16 +25,13 @@ button { padding:12px 20px; font-size:16px; cursor:pointer }
 
 <form id="quizForm"></form>
 
-<!-- IMPORTANT: type="button" -->
 <button type="button" onclick="submitQuiz()">Submit Quiz</button>
 </div>
 
 <script>
-// ================= EMAILJS INIT =================
-emailjs.init("HXnfjwsUcLcGpmzMh"); // ✅ YOUR PUBLIC KEY
-// =================================================
+emailjs.init("HXnfjwsUcLcGpmzMh");
 
-// ================= QUESTIONS ====================
+// ================= QUESTIONS (60) =================
 const questions = [
   {q:"What do you call an Excel file?", a:["Worksheet","Workbook","Cell","Ribbon"], c:1},
   {q:"Rows in Excel run:", a:["Vertically","Diagonally","Horizontally","Randomly"], c:2},
@@ -87,30 +83,39 @@ const questions = [
   {q:"Conditional Formatting rule type:", a:["Icon Sets","Macros","Sheets","Charts"], c:0},
   {q:"Mixed reference example:", a:["A1","$A$1","$A1","Sheet1!A1"], c:2},
   {q:"Rows are numbered:", a:["A,B,C","1,2,3","I,II,III","Alpha"], c:1},
-  {q:"Columns are lettered:", a:["Yes","No","Sometimes","Only tables"], c:0}
+  {q:"Columns are lettered:", a:["Yes","No","Sometimes","Only tables"], c:0},
+
+  /* ===== ADDED QUESTIONS 48–60 ===== */
+  {q:"Which function checks multiple conditions?", a:["SUM","IF","COUNTIFS","LEN"], c:2},
+  {q:"Which Excel feature summarizes large datasets?", a:["Charts","Macros","Pivot Table","Themes"], c:2},
+  {q:"Which function returns text length?", a:["LEN","MID","LEFT","RIGHT"], c:0},
+  {q:"Which symbol starts a formula?", a:["#","=","$","@"], c:1},
+  {q:"Which function joins text strings?", a:["JOIN","MERGE","CONCAT","TEXTJOIN"], c:3},
+  {q:"Which chart best shows trends?", a:["Pie","Bar","Line","Area"], c:2},
+  {q:"Which tool prevents invalid data entry?", a:["Filter","Validation","Protect Sheet","Freeze Panes"], c:1},
+  {q:"Which feature locks cell references?", a:["$","@","!","&"], c:0},
+  {q:"Which function counts non-empty cells?", a:["COUNT","COUNTA","COUNTBLANK","SUM"], c:1},
+  {q:"Which tab contains PivotTable?", a:["Home","Insert","Data","View"], c:1},
+  {q:"Which function rounds numbers?", a:["ROUND","TRIM","INT","VALUE"], c:0},
+  {q:"Which feature hides rows?", a:["Filter","Group","Freeze","Split"], c:1},
+  {q:"Which Excel file supports macros?", a:[".xlsx",".xlsm",".csv",".pdf"], c:1}
 ];
 
-// ================= BUILD QUIZ ===================
+// ================= BUILD QUIZ =================
 const form = document.getElementById("quizForm");
-
 questions.forEach((item, i) => {
   const div = document.createElement("div");
   div.className = "question";
   div.innerHTML =
     `<p><strong>${i+1}. ${item.q}</strong></p>` +
-    item.a.map((opt,j)=>
-      `<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>`
-    ).join("");
+    item.a.map((opt,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>`).join("");
   form.appendChild(div);
 });
 
-// ================= SUBMIT ======================
+// ================= SUBMIT =================
 function submitQuiz(){
   const name = document.getElementById("fullname").value.trim();
-  if(!name){
-    alert("Please enter your full name.");
-    return;
-  }
+  if(!name){ alert("Enter full name."); return; }
 
   let score = 0;
   let resultText = `Name: ${name}\n\n`;
@@ -123,24 +128,21 @@ function submitQuiz(){
 
   resultText += `\nFinal Score: ${score}/60`;
 
-emailjs.send(
-  "service_6wxvrd5",      // ✅ FIXED SERVICE ID
-  "template_h17e9fg",
-  {
-    to_email: "keithrivera@keibatech.com",
-    filename: `${name} - ${score}.txt`,
-    message: resultText
-  },
-  "HXnfjwsUcLcGpmzMh"     // Public key
-)
-.then(() => {
-  alert(`✅ Submitted successfully!\nScore: ${score}/60`);
-})
-.catch(err => {
-  console.error("EmailJS Error:", err);
-  alert("❌ Email failed. Open console (F12).");
-});
-
+  emailjs.send(
+    "service_6wxvrd5",
+    "template_h17e9fg",
+    {
+      to_email: "keithrivera@keibatech.com",
+      filename: `${name} - ${score}.txt`,
+      message: resultText
+    },
+    "HXnfjwsUcLcGpmzMh"
+  ).then(()=>{
+    alert(`✅ Submitted successfully!\nScore: ${score}/60`);
+  }).catch(err=>{
+    console.error(err);
+    alert("❌ Email failed. Check console.");
+  });
 }
 </script>
 </body>
