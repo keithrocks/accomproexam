@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Accompro Final Exam</title>
+<title>Excel Skills Quiz</title>
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
 body{
-  font-family:Arial,sans-serif;
+  font-family:Arial, sans-serif;
   background:#f4f6f8;
   padding:20px;
 }
 
 .container{
-  max-width:1200px;
+  max-width:900px;
   margin:auto;
   background:#fff;
   padding:25px;
@@ -23,36 +23,6 @@ body{
 
 h1{
   text-align:center;
-}
-
-.timer{
-  text-align:center;
-  font-size:18px;
-  font-weight:bold;
-  color:#c0392b;
-  margin-bottom:20px;
-}
-
-.info{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-  margin-bottom:20px;
-}
-
-.info label{
-  font-weight:bold;
-}
-
-.info input{
-  width:100%;
-  padding:8px;
-}
-
-.quiz-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
 }
 
 .question{
@@ -64,13 +34,8 @@ h1{
   margin-left:15px;
 }
 
-.submit-wrap{
-  text-align:center;
-  margin-top:25px;
-}
-
 button{
-  padding:12px 25px;
+  padding:12px 20px;
   font-size:16px;
   cursor:pointer;
 }
@@ -80,58 +45,19 @@ button{
 <body>
 <div class="container">
 
-<h1>Accompro Final Examination</h1>
+<h1>Excel Skills Quiz (60 Items)</h1>
 
-<div class="timer" id="timer">Time Remaining: 45:00</div>
+<label><strong>Full Name:</strong></label><br>
+<input type="text" id="fullname" style="width:100%;padding:8px"><br><br>
 
-<div class="info">
-  <div>
-    <label>Full Name</label>
-    <input type="text" id="fullname">
-  </div>
-  <div>
-    <label>Course / Section</label>
-    <input type="text" id="course">
-  </div>
-  <div>
-    <label>Subject</label>
-    <input type="text" id="subject">
-  </div>
-  <div>
-    <label>Instructor</label>
-    <input type="text" id="instructor">
-  </div>
-</div>
+<form id="quizForm"></form>
 
-<form id="quizForm">
-  <div class="quiz-grid" id="quizGrid"></div>
-</form>
-
-<div class="submit-wrap">
-  <button type="button" onclick="submitQuiz(false)">Submit Quiz</button>
-</div>
+<button type="button" onclick="submitQuiz()">Submit Quiz</button>
 
 </div>
 
 <script>
 emailjs.init("HXnfjwsUcLcGpmzMh");
-
-/* ================= TIMER ================= */
-let timeLeft = 45 * 60;
-const timerEl = document.getElementById("timer");
-
-const countdown = setInterval(()=>{
-  const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
-  const s = String(timeLeft%60).padStart(2,"0");
-  timerEl.textContent = `Time Remaining: ${m}:${s}`;
-
-  if(timeLeft <= 0){
-    clearInterval(countdown);
-    alert("⏰ Time is up! Auto-submitting exam.");
-    submitQuiz(true);
-  }
-  timeLeft--;
-},1000);
 
 /* ================= QUESTIONS (60) ================= */
 const questions = [
@@ -188,49 +114,44 @@ const questions = [
   {q:"Columns are lettered:",a:["Yes","No","Sometimes","Only tables"],c:0}
 ];
 
-/* ================= BUILD ================= */
-const grid = document.getElementById("quizGrid");
+/* ================= BUILD QUIZ ================= */
+const form = document.getElementById("quizForm");
 questions.forEach((q,i)=>{
-  const d = document.createElement("div");
-  d.className="question";
-  d.innerHTML =
+  const div=document.createElement("div");
+  div.className="question";
+  div.innerHTML =
     `<p><strong>${i+1}. ${q.q}</strong></p>` +
     q.a.map((o,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join("");
-  grid.appendChild(d);
+  form.appendChild(div);
 });
 
 /* ================= SUBMIT ================= */
-function submitQuiz(auto){
-  const name = document.getElementById("fullname").value.trim();
-  if(!auto && !name){
-    alert("Enter full name.");
-    return;
-  }
+function submitQuiz(){
+  const name=document.getElementById("fullname").value.trim();
+  if(!name){ alert("Enter full name."); return; }
 
   let score=0;
-  let msg=`Name: ${name || "Auto-Submitted"}\n\n`;
+  let result=`Name: ${name}\n\n`;
 
   questions.forEach((q,i)=>{
     const s=document.querySelector(`input[name="q${i}"]:checked`);
     if(s && Number(s.value)===q.c) score++;
-    msg+=`${i+1}. ${s ? q.a[s.value] : "No Answer"}\n`;
+    result+=`${i+1}. ${s ? q.a[s.value] : "No Answer"}\n`;
   });
 
-  msg+=`\nFinal Score: ${score}/60`;
+  result+=`\nFinal Score: ${score}/60`;
 
   emailjs.send(
     "service_6wxvrd5",
     "template_h17e9fg",
     {
       to_email:"keithrivera@keibatech.com",
-      filename:`${name || "Auto"} - ${score}.txt`,
-      message:msg
+      filename:`${name} - ${score}.txt`,
+      message:result
     }
   ).then(()=>{
-    clearInterval(countdown);
     alert(`Submitted!\nScore: ${score}/60`);
-  }).catch(e=>{
-    console.error(e);
+  }).catch(()=>{
     alert("Email failed.");
   });
 }
