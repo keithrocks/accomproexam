@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Excel Skills Quiz (60 Items)</title>
+<title>Accompro Final Exam</title>
 
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
@@ -48,15 +48,14 @@ h1{
   margin-bottom:20px;
 }
 
-/* === 2 COLUMN QUIZ === */
 .quiz-grid{
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns:1fr 1fr;
   gap:25px;
 }
 
 .question{
-  break-inside: avoid;
+  break-inside:avoid;
 }
 
 .question p{
@@ -78,13 +77,21 @@ button{
   font-size:16px;
   cursor:pointer;
 }
+
+.submitted{
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+  color:#27ae60;
+  margin-top:40px;
+}
 </style>
 </head>
 
 <body>
-<div class="container">
+<div class="container" id="examContainer">
 
-<h1>Excel Skills Quiz (60 Items)</h1>
+<h1>Accompro Final Exam</h1>
 
 <div class="timer" id="timer">Time Remaining: 45:00</div>
 
@@ -98,7 +105,7 @@ button{
 </form>
 
 <div class="actions">
-  <button type="button" onclick="submitQuiz(false)">Submit Quiz</button>
+  <button type="button" id="submitBtn" onclick="submitQuiz(false)">Submit Exam</button>
 </div>
 
 </div>
@@ -106,7 +113,7 @@ button{
 <script>
 emailjs.init("HXnfjwsUcLcGpmzMh");
 
-/* ================= TIMER (45 MINUTES) ================= */
+/* ================= TIMER ================= */
 let timeLeft = 45 * 60;
 const timerEl = document.getElementById("timer");
 
@@ -180,7 +187,6 @@ const questions = [
 
 /* ================= BUILD QUIZ ================= */
 const grid = document.getElementById("quizGrid");
-
 questions.forEach((item,i)=>{
   const div = document.createElement("div");
   div.className = "question";
@@ -223,7 +229,14 @@ function submitQuiz(auto){
     }
   ).then(()=>{
     clearInterval(countdown);
-    alert(`✅ Exam submitted!\nScore: ${score}/60`);
+
+    // 🔒 CLEAR EXAM PAGE
+    document.getElementById("examContainer").innerHTML =
+      `<div class="submitted">
+        ✅ Exam successfully submitted.<br>
+        You may now close this page.
+      </div>`;
+
   }).catch(err=>{
     console.error(err);
     alert("❌ Submission failed. Check console.");
