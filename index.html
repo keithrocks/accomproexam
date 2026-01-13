@@ -52,7 +52,7 @@ button{padding:12px 25px;font-size:16px;cursor:pointer;}
 
 <h1>Accompro Final Examination</h1>
   <br/>
-  <h3>Prof. Keith Rivera</h3>
+  <center><h3>Prof. Keith Rivera</h3></center>
 
 <div class="timer" id="timer">Time Remaining: 45:00</div>
 
@@ -170,7 +170,14 @@ questions.forEach((q,i)=>{
     ).join("");
   grid.appendChild(d);
 });
-
+/* ================= LOCK ANSWERS AFTER SELECT ================= */
+document.addEventListener("change", function(e){
+  if(e.target.type === "radio"){
+    const groupName = e.target.name;
+    const radios = document.querySelectorAll(`input[name="${groupName}"]`);
+    radios.forEach(r => r.disabled = true);
+  }
+});
 /* ================= SUBMIT ================= */
 function submitQuiz(auto){
   const name = document.getElementById("fullname").value.trim();
