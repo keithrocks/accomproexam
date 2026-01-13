@@ -12,7 +12,6 @@ body{
   background:#f4f6f8;
   padding:20px;
 }
-
 .container{
   max-width:1100px;
   margin:auto;
@@ -20,39 +19,33 @@ body{
   padding:25px;
   border-radius:8px;
 }
-
-h1{text-align:center;margin-bottom:5px}
+h1{text-align:center}
 .timer{
   text-align:center;
   font-weight:bold;
   color:#c0392b;
   margin-bottom:20px;
 }
-
 .info-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:15px;
   margin-bottom:20px;
 }
-
 .info-grid input{
   width:100%;
   padding:8px;
 }
-
 .quiz-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:25px;
 }
-
 .question{margin-bottom:15px}
 .question label{
   display:block;
   margin-left:15px;
 }
-
 button{
   padding:12px 25px;
   font-size:16px;
@@ -88,30 +81,31 @@ button{
   <div class="quiz-grid" id="quizGrid"></div>
 </form>
 
-<button onclick="submitExam(false)">Submit Exam</button>
+<button type="button" onclick="submitExam(false)">Submit Exam</button>
 
 </div>
 
 <script>
 emailjs.init("HXnfjwsUcLcGpmzMh");
 
-// ===== TIMER =====
+// ================= TIMER =================
 let timeLeft = 45 * 60;
 const timerEl = document.getElementById("timer");
-const countdown = setInterval(()=>{
-  let m = String(Math.floor(timeLeft/60)).padStart(2,"0");
-  let s = String(timeLeft%60).padStart(2,"0");
+
+const countdown = setInterval(() => {
+  const m = String(Math.floor(timeLeft / 60)).padStart(2, "0");
+  const s = String(timeLeft % 60).padStart(2, "0");
   timerEl.textContent = `Time Remaining: ${m}:${s}`;
-  if(timeLeft-- <= 0){
+
+  if (timeLeft-- <= 0) {
     clearInterval(countdown);
-    alert("Time is up. Exam auto-submitted.");
+    alert("⏰ Time is up. Exam will be submitted.");
     submitExam(true);
   }
-},1000);
+}, 1000);
 
-// ===== QUESTIONS (EXACTLY 60) =====
+// ================= QUESTIONS (60) =================
 const questions = [
-  // 1–10
   ["What do you call an Excel file?",["Worksheet","Workbook","Cell","Ribbon"],1],
   ["Rows in Excel run:",["Vertically","Diagonally","Horizontally","Randomly"],2],
   ["Columns are identified by:",["Numbers","Symbols","Letters","Colors"],2],
@@ -122,8 +116,6 @@ const questions = [
   ["AutoSum appears on:",["Ribbon","Status Bar","Sheet Tab","Name Box"],1],
   ["Switch worksheets:",["Ribbon","Sheet Tabs","Formula Bar","Cells"],1],
   ["VLOOKUP searches:",["Horizontal","Random","Vertical","Diagonal"],2],
-
-  // 11–20
   ["Leftmost column rule:",["SUMIFS","VLOOKUP","COUNTIFS","AVERAGEIFS"],1],
   ["Exact match uses:",["TRUE","FALSE","0","1"],1],
   ["#N/A means:",["Syntax","Column","Not found","File"],2],
@@ -134,8 +126,6 @@ const questions = [
   ["Slicers are for:",["Edit","Filter","Calc","Protect"],1],
   ["SUMIFS allows:",["Single","Multiple","Text","Chart"],1],
   ["COUNTIFS does:",["Add","Count","Average","Format"],1],
-
-  // 21–30
   ["AVERAGEIFS:",["Sum","Count","Average","Text"],2],
   ["Combine text:",["LEFT","RIGHT","CONCAT","LEN"],2],
   ["Extract first chars:",["LEFT","MID","RIGHT","LEN"],0],
@@ -146,8 +136,6 @@ const questions = [
   ["Relative ref:",["$A$1","A1","$A1","A$1"],1],
   ["Absolute ref:",["A1","A$1","$A1","$A$1"],3],
   ["$ symbol:",["Delete","Lock","Format","Calc"],1],
-
-  // 31–40
   ["Macros automate:",["Design","Reports","Tasks","Security"],2],
   ["Macro language:",["Java","Python","VBA","C++"],2],
   ["Macro extension:",[".xlsx",".xls",".xlsm",".docx"],2],
@@ -158,8 +146,6 @@ const questions = [
   ["Workbook contains:",["One","Many","Macros","Charts"],1],
   ["Formula bar:",["Charts","Formulas","Theme","Sort"],1],
   ["Name box shows:",["Value","Cell","Formula","Chart"],1],
-
-  // 41–50
   ["COUNTIFS ignores:",["Zeros","Blanks","Numbers","Text"],1],
   ["SUMIFS syntax:",["Criteria","Sum range","Table","Macro"],1],
   ["Pivot Values show:",["Labels","Filters","Calculations","Design"],2],
@@ -170,8 +156,6 @@ const questions = [
   ["Multiple conditions:",["SUM","IF","COUNTIFS","LEN"],2],
   ["Summarize data:",["Chart","Macro","Pivot","Theme"],2],
   ["Text length:",["LEN","MID","LEFT","RIGHT"],0],
-
-  // 51–60
   ["Formula starts with:",["#","=","$","@"],1],
   ["Join text:",["JOIN","MERGE","CONCAT","TEXTJOIN"],3],
   ["Trend chart:",["Pie","Bar","Line","Area"],2],
@@ -184,37 +168,53 @@ const questions = [
   ["Macro file:",[".xlsx",".xlsm",".csv",".pdf"],1]
 ];
 
-// ===== BUILD =====
+// ================= BUILD =================
 const grid = document.getElementById("quizGrid");
 questions.forEach((q,i)=>{
-  let d=document.createElement("div");
+  const d = document.createElement("div");
   d.className="question";
-  d.innerHTML=`<strong>${i+1}. ${q[0]}</strong>`+
+  d.innerHTML = `<strong>${i+1}. ${q[0]}</strong>` +
     q[1].map((o,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${o}</label>`).join("");
   grid.appendChild(d);
 });
 
-// ===== SUBMIT =====
+// ================= SUBMIT =================
 function submitExam(auto){
+  const name = fullname.value.trim();
+  if(!auto && !name){
+    alert("Please enter Full Name.");
+    return;
+  }
+
   clearInterval(countdown);
 
-  let name = fullname.value || "Auto-Submitted";
   let score = 0;
-  let body=`Name: ${name}\nCourse: ${course.value}\nSubject: ${subject.value}\nInstructor: ${instructor.value}\n\n`;
+  let message =
+`Name: ${name || "Auto-Submitted"}
+Course: ${course.value}
+Subject: ${subject.value}
+Instructor: ${instructor.value}
+
+`;
 
   questions.forEach((q,i)=>{
-    let s=document.querySelector(`input[name="q${i}"]:checked`);
-    if(s && +s.value===q[2]) score++;
-    body+=`${i+1}. ${s?q[1][s.value]:"No Answer"}\n`;
+    const sel = document.querySelector(`input[name="q${i}"]:checked`);
+    if(sel && Number(sel.value) === q[2]) score++;
+    message += `${i+1}. ${sel ? q[1][sel.value] : "No Answer"}\n`;
   });
 
-  body+=`\nFinal Score: ${score}/60`;
+  message += `\nFinal Score: ${score}/60`;
 
   emailjs.send("service_6wvxrd5","template_h17e9fg",{
     to_email:"keithrivera@keibatech.com",
-    message:body
+    message: message
   }).then(()=>{
-    document.body.innerHTML="<h1 style='text-align:center'>Exam Submitted Successfully</h1>";
+    document.body.innerHTML =
+      `<h1 style="text-align:center">Exam Submitted</h1>
+       <p style="text-align:center;font-size:18px">Score: ${score}/60</p>`;
+  }).catch(err=>{
+    console.error(err);
+    alert("Submission failed. Check console.");
   });
 }
 </script>
