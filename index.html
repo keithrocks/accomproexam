@@ -7,177 +7,117 @@
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f6f8;
-  padding:20px
-}
-
-.container {
-  max-width:1100px;
-  margin:auto;
-  background:#fff;
-  padding:25px;
-  border-radius:8px
-}
-
-h1 {
-  text-align:center;
-  margin-bottom:10px
-}
-
-.timer {
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
-  color:#c0392b;
-  margin-bottom:20px
-}
-
-/* TOP INFO GRID */
-.info-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-  margin-bottom:20px
-}
-
-.info-grid label {
-  font-weight:bold
-}
-
-.info-grid input {
-  width:100%;
-  padding:8px;
-  margin-top:5px
-}
-
-/* EXAM GRID */
-.exam-grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px
-}
-
-.question {
-  margin-bottom:15px
-}
-
-.question label {
-  display:block;
-  margin-left:15px
-}
-
-button {
-  padding:12px 20px;
-  font-size:16px;
-  cursor:pointer;
-  margin-top:20px
-}
-
-@media(max-width:900px){
-  .exam-grid {
-    grid-template-columns:1fr
-  }
-  .info-grid {
-    grid-template-columns:1fr
-  }
-}
+body { font-family: Arial, sans-serif; background:#f4f6f8; padding:20px }
+.container { max-width:900px; margin:auto; background:#fff; padding:25px; border-radius:8px }
+h1 { text-align:center }
+.question { margin-bottom:15px }
+.question label { display:block; margin-left:15px }
+button { padding:12px 20px; font-size:16px; cursor:pointer }
 </style>
 </head>
 
 <body>
 <div class="container">
-
 <h1>Excel Skills Quiz (60 Items)</h1>
 
-<div class="timer" id="timer">Time Remaining: 01:00:00</div>
+<label><strong>Full Name:</strong></label><br>
+<input type="text" id="fullname" style="width:100%;padding:8px"><br><br>
 
-<!-- STUDENT INFO -->
-<div class="info-grid">
-  <div>
-    <label>Full Name</label>
-    <input type="text" id="fullname">
-    <label style="margin-top:10px">Subject Name</label>
-    <input type="text" id="subject">
-  </div>
-
-  <div>
-    <label>Course & Section</label>
-    <input type="text" id="course">
-    <label style="margin-top:10px">Instructor</label>
-    <input type="text" id="instructor">
-  </div>
-</div>
-
-<form id="quizForm" class="exam-grid"></form>
+<form id="quizForm"></form>
 
 <button type="button" onclick="submitQuiz()">Submit Quiz</button>
-
 </div>
 
 <script>
-// ================= EMAILJS =================
 emailjs.init("HXnfjwsUcLcGpmzMh");
 
-// ================= TIMER ==================
-let timeLeft = 3600; // 1 hour in seconds
-const timerEl = document.getElementById("timer");
+// ================= QUESTIONS (60) =================
+const questions = [
+  {q:"What do you call an Excel file?", a:["Worksheet","Workbook","Cell","Ribbon"], c:1},
+  {q:"Rows in Excel run:", a:["Vertically","Diagonally","Horizontally","Randomly"], c:2},
+  {q:"Columns are identified by:", a:["Numbers","Symbols","Letters","Colors"], c:2},
+  {q:"Intersection of row and column is called:", a:["Box","Cell","Sheet","Range"], c:1},
+  {q:"Top command area in Excel:", a:["Status Bar","Formula Bar","Ribbon","Name Box"], c:2},
+  {q:"Displays active cell content:", a:["Ribbon","Status Bar","Formula Bar","Sheet Tab"], c:2},
+  {q:"Shows selected cell address:", a:["Status Bar","Name Box","Ribbon","Formula Bar"], c:1},
+  {q:"Displays SUM and AVERAGE info:", a:["Ribbon","Status Bar","Sheet Tab","Name Box"], c:1},
+  {q:"Used to switch worksheets:", a:["Ribbon","Sheet Tabs","Formula Bar","Cells"], c:1},
+  {q:"VLOOKUP searches:", a:["Horizontally","Randomly","Vertically","Diagonally"], c:2},
 
-const countdown = setInterval(() => {
-  const h = String(Math.floor(timeLeft / 3600)).padStart(2,"0");
-  const m = String(Math.floor((timeLeft % 3600) / 60)).padStart(2,"0");
-  const s = String(timeLeft % 60).padStart(2,"0");
-  timerEl.textContent = `Time Remaining: ${h}:${m}:${s}`;
+  {q:"Leftmost column rule applies to:", a:["SUMIFS","VLOOKUP","COUNTIFS","AVERAGEIFS"], c:1},
+  {q:"Exact match VLOOKUP uses:", a:["TRUE","FALSE","0","1"], c:1},
+  {q:"#N/A means:", a:["Wrong syntax","Column error","Value not found","File missing"], c:2},
+  {q:"#REF! means:", a:["Invalid reference","Missing value","Wrong sheet","Permission issue"], c:0},
+  {q:"Pivot Tables are used to:", a:["Design","Format","Summarize data","Encrypt data"], c:2},
+  {q:"Pivot data must have:", a:["Colors","Headers","Macros","Formulas"], c:1},
+  {q:"Pivot Tables update automatically:", a:["Yes","No","Sometimes","Only with macros"], c:1},
+  {q:"Slicers are used for:", a:["Editing","Filtering","Calculating","Protecting"], c:1},
+  {q:"SUMIFS allows:", a:["Single criteria","Multiple criteria","Text only","Charts"], c:1},
+  {q:"COUNTIFS does what?", a:["Adds","Counts","Averages","Formats"], c:1},
 
-  if(timeLeft <= 0){
-    clearInterval(countdown);
-    alert("⏰ Time is up! Exam will be submitted automatically.");
-    submitQuiz(true);
-  }
-  timeLeft--;
-},1000);
+  {q:"AVERAGEIFS calculates:", a:["Sum","Count","Average","Text"], c:2},
+  {q:"Text function to combine text:", a:["LEFT","RIGHT","CONCAT","LEN"], c:2},
+  {q:"Extracts first characters:", a:["LEFT","MID","RIGHT","LEN"], c:0},
+  {q:"Counts characters:", a:["MID","LEN","RIGHT","LEFT"], c:1},
+  {q:"Conditional Formatting changes:", a:["Values","Appearance","Formulas","Files"], c:1},
+  {q:"Highlights duplicates:", a:["Data Bars","Top Rules","Highlight Rules","Icon Sets"], c:2},
+  {q:"Data Bars show:", a:["Numbers","Trends","Text","Errors"], c:1},
+  {q:"Relative reference example:", a:["$A$1","A1","$A1","A$1"], c:1},
+  {q:"Absolute reference example:", a:["A1","A$1","$A1","$A$1"], c:3},
+  {q:"$ symbol purpose:", a:["Delete","Lock reference","Format","Calculate"], c:1},
 
-// ================= QUESTIONS =================
-// (UNCHANGED – same 60 questions from Checkpoint 1)
-const questions = [...Array(60)].map((_,i)=>window.questions ? window.questions[i] : null);
-// NOTE: keep your SAME 60-question array here
-// (Use the exact questions array from Checkpoint 1)
+  {q:"Macros automate:", a:["Design","Reports","Tasks","Security"], c:2},
+  {q:"Macros are written in:", a:["Java","Python","VBA","C++"], c:2},
+  {q:"Macro files extension:", a:[".xlsx",".xls",".xlsm",".docx"], c:2},
+  {q:"Developer tab is for:", a:["Charts","Macros","Security","Printing"], c:1},
+  {q:"Macros improve:", a:["Speed","Accuracy","Efficiency","All"], c:3},
+  {q:"Macro security should be:", a:["Disabled","Enabled with Notification","Hidden","Removed"], c:1},
+  {q:"Worksheet is:", a:["File","Page","Cell","Folder"], c:1},
+  {q:"Workbook may contain:", a:["One sheet only","Multiple worksheets","Only macros","Only charts"], c:1},
+  {q:"Formula Bar is used to:", a:["View charts","Enter formulas","Change theme","Sort data"], c:1},
 
-// ================= BUILD QUIZ =================
+  {q:"Name Box shows:", a:["Value","Cell address","Formula","Chart"], c:1},
+  {q:"COUNTIFS ignores:", a:["Zeros","Blanks","Numbers","Text"], c:1},
+  {q:"SUMIFS syntax requires:", a:["Criteria first","Sum range first","Table","Macro"], c:1},
+  {q:"Pivot Values area displays:", a:["Labels","Filters","Calculations","Design"], c:2},
+  {q:"Conditional Formatting rule type:", a:["Icon Sets","Macros","Sheets","Charts"], c:0},
+  {q:"Mixed reference example:", a:["A1","$A$1","$A1","Sheet1!A1"], c:2},
+  {q:"Rows are numbered:", a:["A,B,C","1,2,3","I,II,III","Alpha"], c:1},
+  {q:"Columns are lettered:", a:["Yes","No","Sometimes","Only tables"], c:0},
+
+  {q:"Which function checks multiple conditions?", a:["SUM","IF","COUNTIFS","LEN"], c:2},
+  {q:"Which Excel feature summarizes large datasets?", a:["Charts","Macros","Pivot Table","Themes"], c:2},
+  {q:"Which function returns text length?", a:["LEN","MID","LEFT","RIGHT"], c:0},
+  {q:"Which symbol starts a formula?", a:["#","=","$","@"], c:1},
+  {q:"Which function joins text strings?", a:["JOIN","MERGE","CONCAT","TEXTJOIN"], c:3},
+  {q:"Which chart best shows trends?", a:["Pie","Bar","Line","Area"], c:2},
+  {q:"Which tool prevents invalid data entry?", a:["Filter","Validation","Protect Sheet","Freeze Panes"], c:1},
+  {q:"Which feature locks cell references?", a:["$","@","!","&"], c:0},
+  {q:"Which function counts non-empty cells?", a:["COUNT","COUNTA","COUNTBLANK","SUM"], c:1},
+  {q:"Which tab contains PivotTable?", a:["Home","Insert","Data","View"], c:1},
+  {q:"Which function rounds numbers?", a:["ROUND","TRIM","INT","VALUE"], c:0},
+  {q:"Which feature hides rows?", a:["Filter","Group","Freeze","Split"], c:1},
+  {q:"Which Excel file supports macros?", a:[".xlsx",".xlsm",".csv",".pdf"], c:1}
+];
+
+// ================= BUILD =================
 const form = document.getElementById("quizForm");
-
 questions.forEach((item, i) => {
   const div = document.createElement("div");
   div.className = "question";
   div.innerHTML =
     `<p><strong>${i+1}. ${item.q}</strong></p>` +
-    item.a.map((opt,j)=>
-      `<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>`
-    ).join("");
+    item.a.map((opt,j)=>`<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label>`).join("");
   form.appendChild(div);
 });
 
 // ================= SUBMIT =================
-function submitQuiz(auto=false){
-  const name = fullname.value.trim();
-  const course = document.getElementById("course").value.trim();
-  const subject = document.getElementById("subject").value.trim();
-  const instructor = document.getElementById("instructor").value.trim();
-
-  if(!auto && (!name || !course || !subject || !instructor)){
-    alert("Please complete all student information.");
-    return;
-  }
+function submitQuiz(){
+  const name = document.getElementById("fullname").value.trim();
+  if(!name){ alert("Enter full name."); return; }
 
   let score = 0;
-  let resultText =
-`Name: ${name}
-Course & Section: ${course}
-Subject: ${subject}
-Instructor: ${instructor}
-
-`;
+  let resultText = `Name: ${name}\n\n`;
 
   questions.forEach((q,i)=>{
     const sel = document.querySelector(`input[name="q${i}"]:checked`);
@@ -192,19 +132,17 @@ Instructor: ${instructor}
     "template_h17e9fg",
     {
       to_email: "keithrivera@keibatech.com",
-      filename: `${name || "Student"} - ${score}.txt`,
+      filename: `${name} - ${score}.txt`,
       message: resultText
     },
     "HXnfjwsUcLcGpmzMh"
   ).then(()=>{
-    alert(`✅ Exam submitted!\nScore: ${score}/60`);
-    clearInterval(countdown);
+    alert(`✅ Submitted successfully!\nScore: ${score}/60`);
   }).catch(err=>{
     console.error(err);
-    alert("❌ Submission failed. Check connection.");
+    alert("❌ Email failed. Check console.");
   });
 }
 </script>
-
 </body>
 </html>
