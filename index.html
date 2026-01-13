@@ -123,23 +123,24 @@ function submitQuiz(){
 
   resultText += `\nFinal Score: ${score}/60`;
 
-  emailjs.send(
-    "service_6wxvrd5",        // SERVICE ID
-    "template_h17e9fg",       // TEMPLATE ID
-    {
-      to_email: "keithrivera@keibatech.com",
-      filename: `${name} - ${score}.txt`,
-      message: resultText
-    },
-    "HXnfjwsUcLcGpmzMh"       // PUBLIC KEY (STRICT MODE FIX)
-  )
-  .then(() => {
-    alert(`✅ Submitted successfully!\nScore: ${score}/60`);
-  })
-  .catch(err => {
-    console.error("EmailJS Error:", err);
-    alert("❌ Email failed. Open console (F12).");
-  });
+emailjs.send(
+  "service_6wxvrd5",      // ✅ FIXED SERVICE ID
+  "template_h17e9fg",
+  {
+    to_email: "keithrivera@keibatech.com",
+    filename: `${name} - ${score}.txt`,
+    message: resultText
+  },
+  "HXnfjwsUcLcGpmzMh"     // Public key
+)
+.then(() => {
+  alert(`✅ Submitted successfully!\nScore: ${score}/60`);
+})
+.catch(err => {
+  console.error("EmailJS Error:", err);
+  alert("❌ Email failed. Open console (F12).");
+});
+
 }
 </script>
 </body>
