@@ -205,10 +205,15 @@ Instructor: ${instructor.value}
 
   message += `\nFinal Score: ${score}/60`;
 
-  emailjs.send("service_6wvxrd5","template_h17e9fg",{
-    to_email:"keithrivera@keibatech.com",
+  emailjs.send(
+  "service_6wvxrd5",
+  "template_h17e9fg",
+  {
+    to_email: "keithrivera@keibatech.com",
     message: message
-  }).then(()=>{
+  },
+  "HXnfjwsUcLcGpmzMh" // PUBLIC KEY — REQUIRED
+).then(()=>{
     document.body.innerHTML =
       `<h1 style="text-align:center">Exam Submitted</h1>
        <p style="text-align:center;font-size:18px">Score: ${score}/60</p>`;
