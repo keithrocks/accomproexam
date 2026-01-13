@@ -210,7 +210,9 @@ Instructor: ${instructor.value}
   "template_h17e9fg",
   {
     to_email: "keithrivera@keibatech.com",
-    message: message
+    subject: `${name} - ${score}/60`,
+    filename: `${name} - ${score}.txt`,
+    message: resultText
   },
   "HXnfjwsUcLcGpmzMh" // PUBLIC KEY — REQUIRED
 ).then(()=>{
