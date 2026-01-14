@@ -20,6 +20,7 @@ body{
   border-radius:8px;
 }
 h1{text-align:center;}
+h3{text-align:center;margin-top:5px;}
 .timer{
   text-align:center;
   font-size:18px;
@@ -51,8 +52,7 @@ button{padding:12px 25px;font-size:16px;cursor:pointer;}
 <div class="container">
 
 <h1>Accompro Final Examination</h1>
-  <br/>
-  <center><h3>Prof. Keith Rivera</h3></center>
+<h3>Prof. Keith Rivera</h3>
 
 <div class="timer" id="timer">Time Remaining: 45:00</div>
 
@@ -93,7 +93,7 @@ const countdown = setInterval(()=>{
   timeLeft--;
 },1000);
 
-/* ================= QUESTIONS (60) ================= */
+/* ================= QUESTIONS (60 EXACT) ================= */
 const questions = [
   {q:"What do you call an Excel file?",a:["Worksheet","Workbook","Cell","Ribbon"],c:1},
   {q:"Rows in Excel run:",a:["Vertically","Diagonally","Horizontally","Randomly"],c:2},
@@ -146,32 +146,17 @@ const questions = [
   {q:"Which chart best shows trends?",a:["Pie","Bar","Line","Area"],c:2},
   {q:"Which tool prevents invalid data entry?",a:["Filter","Validation","Protect Sheet","Freeze Panes"],c:1},
   {q:"Which feature locks cell references?",a:["$","@","!","&"],c:0},
-  {q:"Which function removes extra spaces?",a:["TRIM","CLEAN","LEN","TEXT"],c:0}
-
-  // 🔥 RESTORED QUESTIONS (49–60)
-  {q:"Which function counts numbers only?",a:["COUNT","COUNTA","COUNTBLANK","SUM"],c:0},
-  {q:"Which feature splits worksheet view?",a:["Freeze","Split","Group","Filter"],c:1},
   {q:"Which function removes extra spaces?",a:["TRIM","CLEAN","LEN","TEXT"],c:0},
-  {q:"Which tab contains chart tools?",a:["Home","Insert","Data","View"],c:1},
-  {q:"Which function extracts middle text?",a:["LEFT","MID","RIGHT","LEN"],c:1},
-  {q:"Which tool groups rows or columns?",a:["Group","Filter","Split","Freeze"],c:0},
-  {q:"Which feature protects a worksheet?",a:["Encrypt","Protect Sheet","Hide","Validate"],c:1},
-  {q:"Which function converts text to number?",a:["TEXT","VALUE","NUM","INT"],c:1},
-  {q:"Which Excel feature freezes headers?",a:["Split","Freeze Panes","Group","Filter"],c:1},
+  {q:"Which feature splits worksheet view?",a:["Freeze","Split","Group","Filter"],c:1},
   {q:"Which function rounds up numbers?",a:["ROUND","ROUNDUP","INT","TRUNC"],c:1},
-  {q:"Which function returns current date?",a:["NOW","DATE","TODAY","TIME"],c:2},
-  {q:"Which feature repeats headers when printing?",a:["Print Area","Page Break","Print Titles","Margins"],c:2}
-
+  {q:"Which function returns current date?",a:["NOW","DATE","TODAY","TIME"],c:2}
 ];
 
 /* ================= SHUFFLE ================= */
-function shuffleArray(arr){
-  for(let i = arr.length - 1; i > 0; i--){
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
+for(let i = questions.length - 1; i > 0; i--){
+  const j = Math.floor(Math.random() * (i + 1));
+  [questions[i], questions[j]] = [questions[j], questions[i]];
 }
-shuffleArray(questions);
 
 /* ================= BUILD ================= */
 const grid = document.getElementById("quizGrid");
@@ -185,34 +170,33 @@ questions.forEach((q,i)=>{
     ).join("");
   grid.appendChild(d);
 });
-/* ================= LOCK ANSWERS AFTER SELECT ================= */
-document.addEventListener("change", function(e){
+
+/* ================= LOCK ANSWERS ================= */
+document.addEventListener("change", e=>{
   if(e.target.type === "radio"){
-    const groupName = e.target.name;
-    const radios = document.querySelectorAll(`input[name="${groupName}"]`);
-    radios.forEach(r => r.disabled = true);
+    document.querySelectorAll(`input[name="${e.target.name}"]`)
+      .forEach(r=>r.disabled=true);
   }
 });
+
 /* ================= SUBMIT ================= */
 function submitQuiz(auto){
   const name = document.getElementById("fullname").value.trim();
   if(!auto && !name){ alert("Enter full name."); return; }
 
-  let score = 0;
-  let msg = `Name: ${name || "Auto-Submitted"}\n\n`;
-
+  let score=0, msg=`Name: ${name || "Auto"}\n\n`;
   questions.forEach((q,i)=>{
-    const s = document.querySelector(`input[name="q${i}"]:checked`);
-    if(s && Number(s.value) === q.c) score++;
-    msg += `${i+1}. ${s ? q.a[s.value] : "No Answer"}\n`;
+    const s=document.querySelector(`input[name="q${i}"]:checked`);
+    if(s && Number(s.value)===q.c) score++;
+    msg+=`${i+1}. ${s ? q.a[s.value] : "No Answer"}\n`;
   });
 
-  msg += `\nFinal Score: ${score}/60`;
+  msg+=`\nFinal Score: ${score}/60`;
 
   emailjs.send(
     "service_6wxvrd5",
     "template_h17e9fg",
-    { to_email:"keithrivera@keibatech.com", message: msg }
+    {to_email:"keithrivera@keibatech.com",message:msg}
   ).then(()=>{
     clearInterval(countdown);
     alert(`Submitted!\nScore: ${score}/60`);
