@@ -204,13 +204,17 @@ function submitQuiz(auto){
   msg+=`\nFinal Score: ${score}/60`;
 
   emailjs.send(
-    "service_6wxvrd5",
-    "template_h17e9fg",
-    {to_email:"keithrivera@keibatech.com",message:msg}
-  ).then(()=>{
-    clearInterval(countdown);
-    alert(`Submitted!\nScore: ${score}/60`);
-  });
+  "service_6wxvrd5",
+  "template_h17e9fg",
+  {
+    to_email: "keithrivera@keibatech.com",
+    email_subject: `${name || "Auto-Submitted"} - Score: ${score}/60`,
+    message: msg
+  }
+).then(()=>{
+  clearInterval(countdown);
+  alert(`Submitted!\nScore: ${score}/60`);
+});
 }
 </script>
 </body>
