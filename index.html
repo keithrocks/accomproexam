@@ -682,13 +682,13 @@ function submitQuiz(auto){
     window.location.reload();
   }
 
-  // 1) Save to Google Sheets via Apps Script (fire and forget)
-  fetch(APPS_SCRIPT_URL, {
-    method:   "POST",
-    redirect: "follow",
-    headers:  { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, course, subject, instructor, score, total: 60 })
-  }).catch(()=>{});
+  // 1) Save to Google Sheets via Apps Script using GET to avoid CORS issues
+  const params = new URLSearchParams({
+    action: "save",
+    name, course, subject, instructor,
+    score, total: 60
+  });
+  fetch(`${APPS_SCRIPT_URL}?${params}`, { redirect: "follow" }).catch(()=>{});
 
   // 2) Send via EmailJS then finish
   emailjs.send(
