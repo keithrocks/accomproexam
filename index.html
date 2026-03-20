@@ -3,75 +3,523 @@
 <head>
 <meta charset="UTF-8">
 <title>Accompro Final Examination</title>
-
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 
 <style>
-body{
-  font-family:Arial,sans-serif;
-  background:#f4f6f8;
-  padding:20px;
+:root {
+  --navy:       #0d1b2a;
+  --navy-mid:   #162535;
+  --navy-light: #1e3348;
+  --gold:       #c9a84c;
+  --gold-light: #e2c97e;
+  --gold-pale:  #f5ecd4;
+  --cream:      #faf7f0;
+  --text:       #1a1a2e;
+  --text-muted: #5a5a72;
+  --border:     #d4c5a0;
+  --white:      #ffffff;
+  --shadow-sm:  0 2px 8px rgba(13,27,42,.08);
+  --shadow-md:  0 6px 24px rgba(13,27,42,.14);
+  --shadow-lg:  0 16px 48px rgba(13,27,42,.18);
 }
-.container{
-  max-width:1200px;
-  margin:auto;
-  background:#fff;
-  padding:25px;
-  border-radius:8px;
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  background: var(--cream);
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(201,168,76,.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 100%, rgba(13,27,42,.06) 0%, transparent 55%);
+  min-height: 100vh;
+  padding: 32px 20px 60px;
+  color: var(--text);
 }
-h1{text-align:center;}
-h3{text-align:center;margin-top:5px;}
-.timer{
-  text-align:center;
-  font-size:18px;
-  font-weight:bold;
-  color:#c0392b;
-  margin-bottom:20px;
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  background: var(--white);
+  border-radius: 2px;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
-.info{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-  margin-bottom:20px;
+
+/* ── HEADER ── */
+.exam-header {
+  background: var(--navy);
+  position: relative;
+  overflow: hidden;
 }
-.info label{font-weight:bold;}
-.info input{width:100%;padding:8px;}
-.quiz-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
+
+.exam-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(201,168,76,.04) 60px, rgba(201,168,76,.04) 61px),
+    repeating-linear-gradient(0deg,  transparent, transparent 60px, rgba(201,168,76,.04) 60px, rgba(201,168,76,.04) 61px);
+  pointer-events: none;
 }
-.question{margin-bottom:15px;}
-.question label{display:block;margin-left:15px;}
-.submit-wrap{text-align:center;margin-top:25px;}
-button{padding:12px 25px;font-size:16px;cursor:pointer;}
+
+.header-stripe {
+  height: 4px;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+}
+
+.header-inner {
+  padding: 36px 48px 32px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.seal {
+  width: 72px; height: 72px;
+  flex-shrink: 0;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  color: var(--gold);
+  background: rgba(201,168,76,.08);
+  letter-spacing: -1px;
+}
+
+.header-text { flex: 1; }
+
+.institution-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: .8;
+  margin-bottom: 8px;
+}
+
+.exam-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1.2;
+}
+
+.exam-subtitle {
+  margin-top: 6px;
+  font-size: 15px;
+  color: rgba(255,255,255,.5);
+  font-style: italic;
+}
+
+.header-meta {
+  text-align: right;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  line-height: 2;
+  color: rgba(255,255,255,.35);
+  letter-spacing: 1px;
+}
+
+/* ── TIMER ── */
+.timer-bar {
+  background: var(--navy-mid);
+  border-top: 1px solid rgba(201,168,76,.18);
+  padding: 12px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.timer-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+}
+
+#timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--gold-light);
+  letter-spacing: 3px;
+  transition: color .3s;
+}
+
+#timer.urgent { color: #e05252; animation: pulse-red 1s ease-in-out infinite; }
+@keyframes pulse-red { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+.timer-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ── EXAM BODY ── */
+.exam-body { padding: 36px 48px; }
+
+/* ── INSTRUCTIONS ── */
+.instructions-block {
+  background: var(--gold-pale);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 2px 2px 0;
+  padding: 16px 22px;
+  margin-bottom: 32px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: #3a3020;
+}
+
+.instructions-block .instr-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--navy);
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* ── SECTION HEADING ── */
+.section-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── INFO GRID ── */
+.info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+.info-field label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.info-field input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 16px;
+  color: var(--text);
+  background: var(--cream);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.info-field input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,.12);
+  background: var(--white);
+}
+
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  margin: 28px 0;
+}
+
+/* ── QUIZ SECTION HEADER ── */
+.quiz-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.qs-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.qs-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  background: rgba(201,168,76,.1);
+  border: 1px solid rgba(201,168,76,.3);
+  padding: 2px 10px;
+  border-radius: 20px;
+}
+
+/* ── QUESTION CARDS ── */
+.quiz-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.question {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 18px 20px;
+  transition: border-color .2s, box-shadow .2s;
+  position: relative;
+}
+
+.question:hover {
+  border-color: rgba(201,168,76,.45);
+  box-shadow: var(--shadow-sm);
+}
+
+.question.answered {
+  background: #f8fdf8;
+  border-color: #9ec4a0;
+}
+
+.question.answered::after {
+  content: '✓';
+  position: absolute;
+  top: 12px; right: 14px;
+  font-size: 13px;
+  color: #4a9050;
+  font-weight: bold;
+}
+
+.question p {
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.question p strong {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--gold);
+  font-weight: 500;
+  margin-right: 3px;
+}
+
+.question label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 5px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 14.5px;
+  color: #2a2a3a;
+  line-height: 1.4;
+  transition: background .15s;
+  margin: 1px 0;
+}
+
+.question label:hover { background: rgba(201,168,76,.07); }
+
+.question input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  min-width: 16px;
+  border: 1.5px solid #b0a08a;
+  border-radius: 50%;
+  margin-top: 2px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+
+.question input[type="radio"]:checked {
+  border-color: var(--navy);
+  background: var(--navy);
+  box-shadow: inset 0 0 0 3px var(--white);
+}
+
+.question input[type="radio"]:disabled { cursor: not-allowed; opacity: .65; }
+
+/* ── SUBMIT ── */
+.submit-section {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.submit-note {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  font-style: italic;
+  text-align: center;
+  max-width: 500px;
+  line-height: 1.65;
+}
+
+.submit-btn {
+  padding: 14px 52px;
+  background: var(--navy);
+  color: var(--gold-light);
+  border: 2px solid var(--gold);
+  border-radius: 2px;
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s, box-shadow .2s, transform .1s;
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,.15), transparent);
+  transform: translateX(-100%);
+  transition: transform .45s;
+}
+
+.submit-btn:hover {
+  background: var(--navy-light);
+  box-shadow: 0 4px 20px rgba(13,27,42,.3), 0 0 0 1px var(--gold);
+  transform: translateY(-1px);
+}
+
+.submit-btn:hover::before { transform: translateX(100%); }
+.submit-btn:active { transform: translateY(0); }
+
+/* ── FOOTER ── */
+.exam-footer {
+  background: var(--navy);
+  padding: 14px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(201,168,76,.15);
+}
+
+.footer-left, .footer-right {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.footer-left { color: rgba(255,255,255,.22); }
+.footer-right { color: rgba(201,168,76,.45); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  body { padding: 10px; }
+  .exam-body { padding: 22px 18px; }
+  .header-inner { padding: 22px 18px; flex-wrap: wrap; }
+  .header-meta { display: none; }
+  .timer-bar { padding: 10px 18px; }
+  .info { grid-template-columns: 1fr; }
+  .quiz-grid { grid-template-columns: 1fr; }
+  .exam-footer { padding: 12px 18px; flex-direction: column; gap: 4px; text-align: center; }
+}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<h1>Accompro Final Examination</h1>
-<h3>Prof. Keith Rivera</h3>
+  <!-- HEADER -->
+  <header class="exam-header">
+    <div class="header-stripe"></div>
+    <div class="header-inner">
+      <div class="seal">ACP</div>
+      <div class="header-text">
+        <div class="institution-label">Final Examination · Academic Year 2025–2026</div>
+        <h1 class="exam-title">Accompro Final Examination</h1>
+        <p class="exam-subtitle">Prof. Keith Rivera &nbsp;·&nbsp; Computer Applications</p>
+      </div>
+      <div class="header-meta">
+        <div>TOTAL ITEMS: 60</div>
+        <div>TIME LIMIT: 45 MIN</div>
+        <div>CLOSED BOOK</div>
+      </div>
+    </div>
+    <div class="timer-bar">
+      <div class="timer-dot"></div>
+      <div class="timer-label">Time Remaining</div>
+      <div id="timer">45:00</div>
+    </div>
+  </header>
 
-<div class="timer" id="timer">Time Remaining: 45:00</div>
-<p><b>Instructions:</b> This is a timed online examination, make sure you have read and selected the correct answer on each question. 
-  Once you have selected your answer, that selection will automatically lock, therefore you have no option to change your answer anymore. 
-  Double-submission of exam will result to Zero (Failed). </p>
-<div class="info">
-  <div><label>Full Name</label><input type="text" id="fullname"></div>
-  <div><label>Course / Section</label><input type="text" id="course"></div>
-  <div><label>Subject</label><input type="text" id="subject"></div>
-  <div><label>Instructor</label><input type="text" id="instructor"></div>
-</div>
+  <!-- BODY -->
+  <main class="exam-body">
 
-<form id="quizForm">
-  <div class="quiz-grid" id="quizGrid"></div>
-</form>
+    <div class="instructions-block">
+      <span class="instr-heading">Instructions</span>
+      This is a timed online examination. Ensure you have read and selected the correct answer for each question.
+      Once you have selected your answer, that selection will automatically lock — you will have no option to change your answer.
+      Double-submission of the exam will result in a grade of Zero (Failed).
+    </div>
 
-<div class="submit-wrap">
-  <button type="button" onclick="submitQuiz(false)">Submit Exam</button>
-</div>
+    <div class="section-heading">Examinee Information</div>
+    <div class="info">
+      <div class="info-field"><label>Full Name</label><input type="text" id="fullname" placeholder="Last Name, First Name M.I."></div>
+      <div class="info-field"><label>Course / Section</label><input type="text" id="course" placeholder="e.g. BSBA 3-A"></div>
+      <div class="info-field"><label>Subject</label><input type="text" id="subject" placeholder="Subject Name"></div>
+      <div class="info-field"><label>Instructor</label><input type="text" id="instructor" placeholder="Instructor Name"></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="quiz-section-heading">
+      <span class="qs-title">Multiple Choice</span>
+      <span class="qs-count">60 Items · 1 pt each</span>
+    </div>
+
+    <form id="quizForm">
+      <div class="quiz-grid" id="quizGrid"></div>
+    </form>
+
+    <div class="submit-section">
+      <p class="submit-note">Review all your answers carefully before submitting. Once submitted, your examination cannot be retrieved or re-taken.</p>
+      <button class="submit-btn" type="button" onclick="submitQuiz(false)">Submit Examination</button>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="exam-footer">
+    <div class="footer-left">Accompro · Final Term Assessment</div>
+    <div class="footer-right">Strictly Confidential</div>
+  </footer>
 
 </div>
 
@@ -85,7 +533,8 @@ const timerEl = document.getElementById("timer");
 const countdown = setInterval(()=>{
   const m = String(Math.floor(timeLeft/60)).padStart(2,"0");
   const s = String(timeLeft%60).padStart(2,"0");
-  timerEl.textContent = `Time Remaining: ${m}:${s}`;
+  timerEl.textContent = `${m}:${s}`;
+  if(timeLeft <= 300) timerEl.classList.add("urgent");
 
   if(timeLeft <= 0){
     clearInterval(countdown);
@@ -157,11 +606,10 @@ const questions = [
   {q:"Which function removes non-printable characters?",a:["TRIM","CLEAN","SUBSTITUTE","TEXT"],c:1},
   {q:"Which chart is best for proportions?",a:["Line","Bar","Column","Pie"],c:3},
   {q:"Which Excel feature protects cells from editing?",a:["Filter","Protect Sheet","Freeze Panes","Validation"],c:1},
-  {q:"Which function returns today’s date?",a:["NOW","DATE","TODAY","TIME"],c:2},
+  {q:"Which function returns today's date?",a:["NOW","DATE","TODAY","TIME"],c:2},
   {q:"Which feature allows grouping rows?",a:["Group","Filter","Sort","Split"],c:0},
   {q:"Which function rounds down numbers?",a:["ROUND","ROUNDUP","ROUNDDOWN","INT"],c:2},
   {q:"Which tab is used to create charts?",a:["Home","Insert","Data","View"],c:1}
-
 ];
 
 /* ================= SHUFFLE ================= */
@@ -175,8 +623,9 @@ const grid = document.getElementById("quizGrid");
 questions.forEach((q,i)=>{
   const d = document.createElement("div");
   d.className="question";
+  d.id = `qblock${i}`;
   d.innerHTML =
-    `<p><strong>${i+1}. ${q.q}</strong></p>` +
+    `<p><strong>${i+1}.</strong> ${q.q}</p>` +
     q.a.map((o,j)=>
       `<label><input type="radio" name="q${i}" value="${j}"> ${o}</label>`
     ).join("");
@@ -188,13 +637,16 @@ document.addEventListener("change", e=>{
   if(e.target.type === "radio"){
     document.querySelectorAll(`input[name="${e.target.name}"]`)
       .forEach(r=>r.disabled=true);
+    const idx = e.target.name.replace("q","");
+    const block = document.getElementById(`qblock${idx}`);
+    if(block) block.classList.add("answered");
   }
 });
 
 /* ================= SUBMIT ================= */
 function submitQuiz(auto){
   const name = document.getElementById("fullname").value.trim();
-  if(!auto && !name){ alert("Enter full name."); return; }
+  if(!auto && !name){ alert("Please enter your full name before submitting."); return; }
 
   let score=0, msg=`Name: ${name || "Auto"}\n\n`;
   questions.forEach((q,i)=>{
@@ -206,17 +658,17 @@ function submitQuiz(auto){
   msg+=`\nFinal Score: ${score}/60`;
 
   emailjs.send(
-  "service_6wxvrd5",
-  "template_h17e9fg",
-  {
-    to_email: "keithrivera@keibatech.com",
-    email_subject: `${name || "Auto-Submitted"} - Score: ${score}/60`,
-    message: msg
-  }
-).then(()=>{
-  clearInterval(countdown);
-  alert(`Submitted!\nScore: ${score}/60`);
-});
+    "service_6wxvrd5",
+    "template_h17e9fg",
+    {
+      to_email: "keithrivera@keibatech.com",
+      email_subject: `${name || "Auto-Submitted"} - Score: ${score}/60`,
+      message: msg
+    }
+  ).then(()=>{
+    clearInterval(countdown);
+    alert(`Examination submitted!\nScore: ${score}/60`);
+  });
 }
 </script>
 </body>
