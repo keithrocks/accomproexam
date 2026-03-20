@@ -682,6 +682,7 @@ function submitQuiz(auto){
   ).then(()=>{
     clearInterval(countdown);
     alert(`Examination submitted!\nScore: ${score}/60`);
+    window.location.reload();
   });
 }
 </script>
