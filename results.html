@@ -324,6 +324,11 @@ tbody td:last-child { border-right: none; }
 .footer-right { color: rgba(201,168,76,.45); }
 
 /* ── PRINT ── */
+@keyframes modalIn {
+  from { opacity:0; transform:scale(.96); }
+  to   { opacity:1; transform:scale(1); }
+}
+
 @media print {
   body { background: white; padding: 0; }
   .container { box-shadow: none; border: none; }
@@ -404,6 +409,34 @@ tbody td:last-child { border-right: none; }
       </div>
     </div>
   </main>
+
+  <!-- PASSWORD MODAL -->
+  <div id="pwdOverlay" style="display:none; position:fixed; inset:0; background:rgba(13,27,42,.65); z-index:1000; align-items:center; justify-content:center;">
+    <div id="pwdModal" style="background:#fff; border:1px solid var(--border); border-radius:2px; box-shadow:0 24px 64px rgba(13,27,42,.35); width:100%; max-width:400px; overflow:hidden; animation:modalIn .2s ease;">
+      <div style="background:var(--navy); padding:20px 24px; border-bottom:1px solid rgba(201,168,76,.2);">
+        <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); opacity:.8; margin-bottom:6px;">Administrator Access</div>
+        <div style="font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:#fff;">Confirm Clear All</div>
+      </div>
+      <div style="padding:24px;">
+        <p style="font-size:14px; color:var(--text-muted); margin-bottom:18px; line-height:1.6;">This action will permanently delete all examination results. Enter the administrator password to proceed.</p>
+        <label style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:1.8px; text-transform:uppercase; color:var(--text-muted); display:block; margin-bottom:6px;">Password</label>
+        <input id="pwdInput" type="password" placeholder="Enter password…"
+          style="width:100%; padding:10px 14px; border:1px solid var(--border); border-radius:2px; font-family:'Crimson Pro',serif; font-size:16px; color:var(--text); background:var(--cream); outline:none; transition:border-color .2s, box-shadow .2s;"
+          onkeydown="if(event.key==='Enter') confirmClear(); if(event.key==='Escape') closePwdModal();">
+        <div id="pwdError" style="display:none; margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:11px; color:#8b1a1a; letter-spacing:.5px;">✕ &nbsp;Incorrect password. Access denied.</div>
+        <div style="display:flex; gap:10px; margin-top:20px; justify-content:flex-end;">
+          <button onclick="closePwdModal()"
+            style="padding:9px 22px; border:1.5px solid var(--border); border-radius:2px; background:transparent; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text-muted); cursor:pointer;">
+            Cancel
+          </button>
+          <button onclick="confirmClear()"
+            style="padding:9px 22px; border:1.5px solid rgba(220,80,80,.5); border-radius:2px; background:transparent; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:#e07070; cursor:pointer;">
+            Clear All
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer class="page-footer">
@@ -617,13 +650,26 @@ function sortTable(colIdx) {
 
 // ── CLEAR ──
 function clearResults() {
-  const pwd = prompt("Enter administrator password to clear all results:");
-  if (pwd === null) return; // cancelled
+  document.getElementById("pwdInput").value = "";
+  document.getElementById("pwdError").style.display = "none";
+  const overlay = document.getElementById("pwdOverlay");
+  overlay.style.display = "flex";
+  setTimeout(() => document.getElementById("pwdInput").focus(), 50);
+}
+
+function closePwdModal() {
+  document.getElementById("pwdOverlay").style.display = "none";
+}
+
+function confirmClear() {
+  const pwd = document.getElementById("pwdInput").value;
   if (pwd !== "keibatech2026") {
-    showToast("Incorrect password. Access denied.", "error");
+    document.getElementById("pwdError").style.display = "block";
+    document.getElementById("pwdInput").value = "";
+    document.getElementById("pwdInput").focus();
     return;
   }
-  if (!confirm("Password accepted. Are you sure you want to clear ALL results? This cannot be undone.")) return;
+  closePwdModal();
 
   fetch(`${APPS_SCRIPT_URL}?action=clear`, { redirect: "follow" })
     .then(() => {
@@ -636,9 +682,16 @@ function clearResults() {
       allResults = [];
       renderTable([]);
       updateStats([]);
-      showToast("Local view cleared. If the sheet wasn't cleared, re-deploy your Apps Script.", "warning");
+      showToast("Local view cleared. Re-deploy Apps Script if sheet wasn't cleared.", "warning");
     });
 }
+
+// Close modal on overlay click
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("pwdOverlay").addEventListener("click", function(e) {
+    if (e.target === this) closePwdModal();
+  });
+});
 
 // ── TOAST ──
 function showToast(message, type = "success") {
