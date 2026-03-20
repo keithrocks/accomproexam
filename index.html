@@ -645,7 +645,11 @@ document.addEventListener("change", e=>{
 
 /* ================= SUBMIT ================= */
 function submitQuiz(auto){
-  const name = document.getElementById("fullname").value.trim();
+  const name       = document.getElementById("fullname").value.trim();
+  const course     = document.getElementById("course").value.trim();
+  const subject    = document.getElementById("subject").value.trim();
+  const instructor = document.getElementById("instructor").value.trim();
+
   if(!auto && !name){ alert("Please enter your full name before submitting."); return; }
 
   let score=0, msg=`Name: ${name || "Auto"}\n\n`;
@@ -654,9 +658,19 @@ function submitQuiz(auto){
     if(s && Number(s.value)===q.c) score++;
     msg+=`${i+1}. ${s ? q.a[s.value] : "No Answer"}\n`;
   });
-
   msg+=`\nFinal Score: ${score}/60`;
 
+  // 1) Save to results.json via submit.php
+  fetch("submit.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name, course, subject, instructor,
+      score, total: 60
+    })
+  }).catch(()=>{}); // fail silently if PHP not available
+
+  // 2) Send via EmailJS
   emailjs.send(
     "service_6wxvrd5",
     "template_h17e9fg",
