@@ -652,6 +652,8 @@ function submitQuiz(auto){
 
   if(!auto && !name){ alert("Please enter your full name before submitting."); return; }
 
+  clearInterval(countdown);
+
   let score=0, msg=`Name: ${name || "Auto"}\n\n`;
   questions.forEach((q,i)=>{
     const s=document.querySelector(`input[name="q${i}"]:checked`);
@@ -660,17 +662,14 @@ function submitQuiz(auto){
   });
   msg+=`\nFinal Score: ${score}/60`;
 
-  // 1) Save to results.json via submit.php
+  // 1) Save to results.json via submit.php (fire and forget)
   fetch("submit.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      name, course, subject, instructor,
-      score, total: 60
-    })
-  }).catch(()=>{}); // fail silently if PHP not available
+    body: JSON.stringify({ name, course, subject, instructor, score, total: 60 })
+  }).catch(()=>{});
 
-  // 2) Send via EmailJS
+  // 2) Send via EmailJS, then reload regardless of outcome
   emailjs.send(
     "service_6wxvrd5",
     "template_h17e9fg",
@@ -679,8 +678,7 @@ function submitQuiz(auto){
       email_subject: `${name || "Auto-Submitted"} - Score: ${score}/60`,
       message: msg
     }
-  ).then(()=>{
-    clearInterval(countdown);
+  ).finally(()=>{
     alert(`Examination submitted!\nScore: ${score}/60`);
     window.location.reload();
   });
