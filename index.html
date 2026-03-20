@@ -643,6 +643,9 @@ document.addEventListener("change", e=>{
   }
 });
 
+// ── PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ──
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8mitqekiP9cyLluGpF5tfwkPhUSvEEGJT8fVywwGct6DqFNYqIMg8kkFHOAp0i7PsAA/exec";
+
 /* ================= SUBMIT ================= */
 function submitQuiz(auto){
   const name       = document.getElementById("fullname").value.trim();
@@ -652,7 +655,12 @@ function submitQuiz(auto){
 
   if(!auto && !name){ alert("Please enter your full name before submitting."); return; }
 
+  // Stop timer immediately
   clearInterval(countdown);
+
+  // Disable submit button to prevent double submission
+  const btn = document.querySelector(".submit-btn");
+  if(btn){ btn.disabled = true; btn.textContent = "Submitting…"; }
 
   let score=0, msg=`Name: ${name || "Auto"}\n\n`;
   questions.forEach((q,i)=>{
@@ -662,14 +670,26 @@ function submitQuiz(auto){
   });
   msg+=`\nFinal Score: ${score}/60`;
 
-  // 1) Save to results.json via submit.php (fire and forget)
-  fetch("submit.php", {
+  // Guaranteed reload — fires after 6s no matter what
+  const safeReload = setTimeout(()=>{
+    alert(`Examination submitted!\nScore: ${score}/60`);
+    window.location.reload();
+  }, 6000);
+
+  function finish(){
+    clearTimeout(safeReload);
+    alert(`Examination submitted!\nScore: ${score}/60`);
+    window.location.reload();
+  }
+
+  // 1) Save to Google Sheets via Apps Script (fire and forget)
+  fetch(APPS_SCRIPT_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name, course, subject, instructor, score, total: 60 })
   }).catch(()=>{});
 
-  // 2) Send via EmailJS, then reload regardless of outcome
+  // 2) Send via EmailJS then finish
   emailjs.send(
     "service_6wxvrd5",
     "template_h17e9fg",
@@ -678,10 +698,7 @@ function submitQuiz(auto){
       email_subject: `${name || "Auto-Submitted"} - Score: ${score}/60`,
       message: msg
     }
-  ).finally(()=>{
-    alert(`Examination submitted!\nScore: ${score}/60`);
-    window.location.reload();
-  });
+  ).then(finish).catch(finish);
 }
 </script>
 </body>
