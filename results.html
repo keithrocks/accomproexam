@@ -432,10 +432,17 @@ async function loadResults() {
   updateStats([]);
 
   try {
-    const res  = await fetch(`${APPS_SCRIPT_URL}?action=results`);
-    const data = await res.json();
-
-    if (!Array.isArray(data)) throw new Error("Unexpected response");
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=results`, { redirect: "follow" });
+    const text = await res.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch(_) {
+      throw new Error("Response was not valid JSON. Received: " + text.slice(0, 300));
+    }
+    if (!Array.isArray(data)) {
+      throw new Error("Expected an array. Got: " + JSON.stringify(data).slice(0, 200));
+    }
 
     allResults = data;
     renderTable(allResults);
@@ -450,7 +457,17 @@ async function loadResults() {
       <div class="state-box">
         <div class="state-icon">⚠️</div>
         <div class="state-title">Could not load results</div>
-        <div class="state-sub">Make sure APPS_SCRIPT_URL is set correctly.<br><small style="font-family:monospace;font-size:12px;">${err.message}</small></div>
+        <div class="state-sub" style="max-width:640px;margin:0 auto;word-break:break-word;font-style:normal;text-align:left;background:#fff8f0;border:1px solid #e0c090;border-radius:4px;padding:16px 20px;color:#3a2a10;">
+          <b style="display:block;margin-bottom:8px;">Diagnosis:</b>
+          <code style="font-size:12px;display:block;margin-bottom:12px;color:#8b1a1a;">${escHtml(err.message)}</code>
+          <b style="display:block;margin-bottom:6px;">Common fixes:</b>
+          <ol style="padding-left:18px;font-size:14px;line-height:2;">
+            <li>APPS_SCRIPT_URL must end in <code>/exec</code> — not <code>/dev</code></li>
+            <li>Re-deploy: <b>Deploy → Manage Deployments → ✏️ Edit → Version: New</b></li>
+            <li>Deployment access must be set to <b>Anyone</b> (not "Anyone with Google account")</li>
+            <li>Open the URL directly in a browser tab — it should return <code>[]</code></li>
+          </ol>
+        </div>
       </div>`;
   }
 }
@@ -598,12 +615,14 @@ function sortTable(colIdx) {
   rows.forEach(r => tbody.appendChild(r));
 }
 
-// ── CLEAR ──//
+// ── CLEAR ──
 async function clearResults() {
   if (!confirm("Are you sure you want to clear ALL results? This cannot be undone.")) return;
 
   try {
-    await fetch(`${APPS_SCRIPT_URL}?action=clear`);
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=clear`, { redirect: "follow" });
+    const text = await res.text();
+    JSON.parse(text); // validate
     allResults = [];
     renderTable([]);
     updateStats([]);
@@ -614,6 +633,12 @@ async function clearResults() {
 
 // ── HELPERS ──
 function esc(str) {
+  return String(str ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function escHtml(str) {
   return String(str ?? "")
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
     .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
