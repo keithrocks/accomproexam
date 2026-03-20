@@ -617,22 +617,67 @@ function sortTable(colIdx) {
 
 // ── CLEAR ──
 function clearResults() {
-  if (!confirm("Are you sure you want to clear ALL results? This cannot be undone.")) return;
+  const pwd = prompt("Enter administrator password to clear all results:");
+  if (pwd === null) return; // cancelled
+  if (pwd !== "keibatech2026") {
+    showToast("Incorrect password. Access denied.", "error");
+    return;
+  }
+  if (!confirm("Password accepted. Are you sure you want to clear ALL results? This cannot be undone.")) return;
 
-  // Use fetch with redirect:follow for clear (same origin policy is relaxed for GET)
   fetch(`${APPS_SCRIPT_URL}?action=clear`, { redirect: "follow" })
     .then(() => {
       allResults = [];
       renderTable([]);
       updateStats([]);
+      showToast("All results cleared successfully.", "success");
     })
     .catch(() => {
-      // Even if fetch fails, clear locally and inform
       allResults = [];
       renderTable([]);
       updateStats([]);
-      alert("Local view cleared. If the sheet wasn't cleared, re-deploy your Apps Script.");
+      showToast("Local view cleared. If the sheet wasn't cleared, re-deploy your Apps Script.", "warning");
     });
+}
+
+// ── TOAST ──
+function showToast(message, type = "success") {
+  const existing = document.getElementById("toast");
+  if (existing) existing.remove();
+
+  const colors = {
+    success: { bg: "#edf7f1", border: "#a8d5b8", text: "#2e7d4f" },
+    error:   { bg: "#fdf0f0", border: "#e0b0b0", text: "#8b1a1a" },
+    warning: { bg: "#fdf8ed", border: "#e0d090", text: "#7a5a10" },
+  };
+  const c = colors[type] || colors.success;
+
+  const toast = document.createElement("div");
+  toast.id = "toast";
+  toast.textContent = message;
+  toast.style.cssText = `
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    background: ${c.bg}; color: ${c.text};
+    border: 1px solid ${c.border}; border-radius: 2px;
+    padding: 12px 28px; font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.5px;
+    box-shadow: 0 8px 32px rgba(13,27,42,.18);
+    z-index: 9999; white-space: nowrap;
+    animation: toastIn .25s ease;
+  `;
+
+  document.head.insertAdjacentHTML("beforeend", `
+    <style>
+      @keyframes toastIn  { from { opacity:0; transform:translateX(-50%) translateY(10px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+      @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+    </style>
+  `);
+
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = "toastOut .3s ease forwards";
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
 
 // ── HELPERS ──
