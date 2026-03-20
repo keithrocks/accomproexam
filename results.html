@@ -616,19 +616,23 @@ function sortTable(colIdx) {
 }
 
 // ── CLEAR ──
-async function clearResults() {
+function clearResults() {
   if (!confirm("Are you sure you want to clear ALL results? This cannot be undone.")) return;
 
-  try {
-    const res  = await fetch(`${APPS_SCRIPT_URL}?action=clear`, { redirect: "follow" });
-    const text = await res.text();
-    JSON.parse(text); // validate
-    allResults = [];
-    renderTable([]);
-    updateStats([]);
-  } catch (err) {
-    alert("Failed to clear results: " + err.message);
-  }
+  // Use fetch with redirect:follow for clear (same origin policy is relaxed for GET)
+  fetch(`${APPS_SCRIPT_URL}?action=clear`, { redirect: "follow" })
+    .then(() => {
+      allResults = [];
+      renderTable([]);
+      updateStats([]);
+    })
+    .catch(() => {
+      // Even if fetch fails, clear locally and inform
+      allResults = [];
+      renderTable([]);
+      updateStats([]);
+      alert("Local view cleared. If the sheet wasn't cleared, re-deploy your Apps Script.");
+    });
 }
 
 // ── HELPERS ──
